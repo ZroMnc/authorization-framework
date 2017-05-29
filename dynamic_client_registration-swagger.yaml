@@ -26,17 +26,21 @@ paths:
             $ref: '#/definitions/client-configuration'
   
   /register/{client-id}:
+    parameters:
+      - $ref: '#/parameters/client_id' 
+  
     put:
       summary: Registration Endpoint
-      description: Enables the registration of OAuth 2.0 clients
+      description: Enables the update of OAuth 2.0 clients, does not augment values
       parameters:
-        - $ref: '#/parameters/client_id'
         - $ref: '#/parameters/registration_token'
-        - $ref: '#/parameters/client_registration'
+        - $ref: '#/parameters/client_update_request'
       produces:
         - application/json
+      consumes:
+        - application/json
       responses:
-        201:
+        200:
           description: client created
           schema:
             $ref: '#/definitions/client-configuration'
@@ -46,7 +50,6 @@ paths:
       description: Operation retrieve all operational attributes except the client secret.
       parameters:
         - $ref: '#/parameters/registration_token'
-        - $ref: '#/parameters/client_id' 
       produces:
         - application/json
       responses:
@@ -54,6 +57,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/client-read-response'
+    
+    delete:
+      summary: Remove a client 
+      description: Removing a client
+      parameters:
+        - $ref: '#/parameters/registration_token'
+      responses:
+        204:
+          description: No Content
+    
 
   /oauth2/revoke:
     post:
@@ -111,6 +124,52 @@ definitions:
         type: string
       logo_uri:
         type: string
+        
+  client-update-request:
+    type: object
+    description: OAuth 2.0 client update
+    required:
+      - client_id
+    properties:
+      business-partner:
+        type: string
+        description: identifier of the business partner the client is created for. If ommitted this will be taken from the access_token.
+      client_id:
+        type: string
+      client_name:
+        type: string
+      grant_type:
+        type: array
+        items:
+          type: string
+      response_type:
+        type: array
+        items: 
+          type: string
+      redirect_uris:
+        type: array
+        items: 
+          type: string
+      privileges:
+        type: array
+        items:
+          type: string
+      audience:
+        type: array
+        items:
+          type: string
+      software_id:
+        type: string
+      software_version:
+        type: string
+      contacts:
+        type: string
+      policy_uri:
+        type: string
+      tos_uri:
+        type: string
+      logo_uri:
+        type: string
   
   client-configuration:
     type: object
@@ -129,6 +188,8 @@ definitions:
         format: int32
         minimum: 0
       registration-token:
+        type: string
+      registration_client_uri:
         type: string
       business-partner:
         type: string
@@ -220,62 +281,6 @@ definitions:
       logo_uri:
         type: string 
         
-  client:
-    type: object
-    description: full oauth2 client configuration
-    properties:
-      client_id:
-        type: string
-      client_uri:
-        type: string
-      client_id_issued_at:
-        type: string
-      client_secret_expires_at:
-        type: integer
-        format: int32
-        minimum: 0
-      business-partner:
-        type: string
-        description: identifier of the business partner the client is created for
-      client_name:
-        type: string
-      grant_type:
-        type: array
-        items:
-          type: string
-      response_type:
-        type: array
-        items: 
-          type: string
-      redirect_uris:
-        type: array
-        items: 
-          type: string
-      privileges:
-        type: array
-        items:
-          type: string
-      audience:
-        type: array
-        items:
-          type: string
-      software_id:
-        type: string
-      software_version:
-        type: string
-      contacts:
-        type: string
-      policy_uri:
-        type: string
-      tos_uri:
-        type: string
-      logo_uri:
-        type: string
-        
-  registration-token:
-    type: string
-    description: registration token
-  
   token-revocation:
     type: object
     description: params to revoke the registration token
@@ -304,7 +309,15 @@ parameters:
     required: true
     schema:
       $ref: '#/definitions/client-creation'
-  
+      
+  client_update_request:
+    name: client-registration
+    in: body
+    description: parameters to create a client
+    required: true
+    schema:
+      $ref: '#/definitions/client-update-request'
+      
   registration_token:
     name: registration-token
     in: header
