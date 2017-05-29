@@ -1,0 +1,329 @@
+swagger: '2.0'
+
+info:
+  title: Dynamic Client Registration
+  description:  'API to create and manage OAuth2 Clients'
+  version: "0.0.1"
+  
+schemes:
+ - https
+
+paths:
+
+  /register:
+    post:
+      summary: Registration Endpoint
+      description: Enables the registration of OAuth 2.0 clients
+      parameters:
+        - $ref: '#/parameters/inital_access_token'
+        - $ref: '#/parameters/client_registration'
+      produces:
+        - application/json
+      responses:
+        201:
+          description: client created
+          schema:
+            $ref: '#/definitions/client-configuration'
+  
+  /register/{client-id}:
+    put:
+      summary: Registration Endpoint
+      description: Enables the registration of OAuth 2.0 clients
+      parameters:
+        - $ref: '#/parameters/client_id'
+        - $ref: '#/parameters/registration_token'
+        - $ref: '#/parameters/client_registration'
+      produces:
+        - application/json
+      responses:
+        201:
+          description: client created
+          schema:
+            $ref: '#/definitions/client-configuration'
+    
+    get:
+      summary: Retrieve client configuration
+      description: Operation retrieve all operational attributes except the client secret.
+      parameters:
+        - $ref: '#/parameters/registration_token'
+        - $ref: '#/parameters/client_id' 
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/client-read-response'
+
+  /oauth2/revoke:
+    post:
+      summary: revokes a registration tokens
+      description: allow the revocation of registration token
+      parameters:
+        - $ref: '#/parameters/revocation'
+      responses:
+        200:
+          description: OK
+    
+    
+    
+            
+definitions:
+  
+  client-creation:
+    type: object
+    description: oauth2 client configuration
+    properties:
+      business-partner:
+        type: string
+        description: identifier of the business partner the client is created for. If ommitted this will be taken from the access_token.
+      client_name:
+        type: string
+      grant_type:
+        type: array
+        items:
+          type: string
+      response_type:
+        type: array
+        items: 
+          type: string
+      redirect_uris:
+        type: array
+        items: 
+          type: string
+      privileges:
+        type: array
+        items:
+          type: string
+      audience:
+        type: array
+        items:
+          type: string
+      software_id:
+        type: string
+      software_version:
+        type: string
+      contacts:
+        type: string
+      policy_uri:
+        type: string
+      tos_uri:
+        type: string
+      logo_uri:
+        type: string
+  
+  client-configuration:
+    type: object
+    description: full oauth2 client configuration
+    properties:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+      client_uri:
+        type: string
+      client_id_issued_at:
+        type: string
+      client_secret_expires_at:
+        type: integer
+        format: int32
+        minimum: 0
+      registration-token:
+        type: string
+      business-partner:
+        type: string
+        description: identifier of the business partner the client is created for
+      client_name:
+        type: string
+      grant_type:
+        type: array
+        items:
+          type: string
+      response_type:
+        type: array
+        items: 
+          type: string
+      redirect_uris:
+        type: array
+        items: 
+          type: string
+      privileges:
+        type: array
+        items:
+          type: string
+      audience:
+        type: array
+        items:
+          type: string
+      software_id:
+        type: string
+      software_version:
+        type: string
+      contacts:
+        type: string
+      policy_uri:
+        type: string
+      tos_uri:
+        type: string
+      logo_uri:
+        type: string
+      token_endpoint_auth_method:
+        type: string
+  
+  client-read-response:
+    type: object
+    description: RFC compliant response
+    required:
+      - registration_access_token
+      - registration_client_uri
+      - client_id
+      - client_secret
+      - client_id_issued_at
+      - client_secret_expires_at
+      - client_name
+      - grant_type
+      - token_endpoint_auth_method
+      - redirect_uris
+      - jwks_uri
+      - logo_uri
+    properties:
+      registration_access_token:
+        type: string
+      registration_client_uri:
+        type: string
+      client_id:
+        type: string
+      client_secret:
+        type: string
+      client_id_issued_at:
+        type: string
+      client_secret_expires_at:
+        type: integer
+        format: int32
+        minimum: 0
+      client_name:
+        type: string
+      grant_type:
+        type: array
+        items:
+          type: string
+      token_endpoint_auth_method:
+        type: string
+      business-partner:
+        type: string
+      redirect_uris:
+        type: array
+        items: 
+          type: string
+      jwks_uri:
+        type: string
+      logo_uri:
+        type: string 
+        
+  client:
+    type: object
+    description: full oauth2 client configuration
+    properties:
+      client_id:
+        type: string
+      client_uri:
+        type: string
+      client_id_issued_at:
+        type: string
+      client_secret_expires_at:
+        type: integer
+        format: int32
+        minimum: 0
+      business-partner:
+        type: string
+        description: identifier of the business partner the client is created for
+      client_name:
+        type: string
+      grant_type:
+        type: array
+        items:
+          type: string
+      response_type:
+        type: array
+        items: 
+          type: string
+      redirect_uris:
+        type: array
+        items: 
+          type: string
+      privileges:
+        type: array
+        items:
+          type: string
+      audience:
+        type: array
+        items:
+          type: string
+      software_id:
+        type: string
+      software_version:
+        type: string
+      contacts:
+        type: string
+      policy_uri:
+        type: string
+      tos_uri:
+        type: string
+      logo_uri:
+        type: string
+        
+  registration-token:
+    type: string
+    description: registration token
+  
+  token-revocation:
+    type: object
+    description: params to revoke the registration token
+    properties:
+      token:
+        type: string
+      token-hint:
+        type: string
+    example:
+      token: "123"
+      token-hint: "registration"
+        
+parameters:
+  
+  client_id:
+    name: client-id
+    in: path
+    description: id of a client
+    required: true
+    type: string
+    
+  client_registration:
+    name: client-registration
+    in: body
+    description: parameters to create a client
+    required: true
+    schema:
+      $ref: '#/definitions/client-creation'
+  
+  registration_token:
+    name: registration-token
+    in: header
+    description: registration return on client creation and updates
+    required: true
+    type: string
+    
+  revocation:
+    name: revocation
+    in: body
+    description: revoke a registration token
+    required: false
+    schema:
+      $ref: '#/definitions/token-revocation'
+
+  inital_access_token:
+    name: Authorization
+    in: header
+    description: token required to register a client
+    required: true
+    type: string
+  

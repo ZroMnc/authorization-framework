@@ -1,0 +1,71 @@
+swagger: '2.0'
+
+info:
+  title: Policy API - Decision Point of Platform IAM
+  description:  'Policy API - Retrieve Operational Decisions - Policy Decision Point (PDP)'
+  version: "0.0.1"
+  
+schemes:
+ - https
+
+paths:
+
+  /descisions/{resource-id}:
+    parameters:
+      - name: resource-id
+        in: path
+        required: true
+        type: string
+        description: identifies a resource
+  
+    post:
+      summary: Get Access Decision
+      description: request to determine if a requesting service is allowed to execute operations on a resource. Should pass the subject-token as body parameter
+      parameters:
+        - $ref: '#/parameters/subject_token'
+        - $ref: '#/parameters/bearer_token'
+      produces:
+        - application/json
+      responses:
+        200:
+          description: policy created
+          schema:
+            $ref: '#/definitions/decision'
+            
+definitions:
+
+  decision:
+    type: object
+    description: string representation to a policy decision, could be permit, deny, not_applicable or indetermined
+    properties:
+      decision:
+        type: string
+        description: simple restriction to segregate user, services and customers
+    example:
+      decision: "Permit"
+  
+  subject-token:
+    type: object
+    description: token of the to be evaluated subject
+    properties:
+      token:
+        type: string
+        description: bearer token of the subject
+
+parameters:
+
+  subject_token:
+    name: subject-token
+    in: body
+    description: token of the service requesting access to a resource
+    required: true
+    schema:
+      $ref: '#/definitions/subject-token'
+      
+  bearer_token:
+    name: Authorization
+    in: header
+    description: token of the resource owner
+    required: true
+    type: string
+  

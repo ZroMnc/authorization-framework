@@ -1,0 +1,359 @@
+swagger: '2.0'
+
+info:
+  title: Policy API of Platform IAM
+  description:  'Policy API - Creation and Management (PAP) - Policy Administration Point'
+  version: "0.0.1"
+
+securityDefinitions:
+  read:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://identity.zalando.com/oauth2/authorize
+    tokenUrl: https://identity.zalando.com/oauth2/token
+    description: read policies
+    scopes:
+      com.zalando.identity::policy.read: Allows retrieving all information about a Business Partner
+  write:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://identity.zalando.com/oauth2/authorize
+    tokenUrl: https://identity.zalando.com/oauth2/token
+    description: write policies
+    scopes:
+      com.zalando.identity::policy.write: Allows creation and changes
+
+paths:
+  /policies:
+    post:
+      summary: Creates a policy
+      description: create a policy
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - write:
+          - com.zalando.identity::policy.write
+      responses:
+        201:
+          description: policy created
+          schema:
+            $ref: '#/definitions/policy'
+  
+    get:
+      summary: Returns all known policies
+      description: read all policies
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - read:
+          - com.zalando.identity::policy.read
+      responses:
+        200:
+          description: return all policies
+          schema:
+            $ref: '#/definitions/policies'
+            
+  /policies/{policy-id}:
+    parameters:
+      - $ref: '#/parameters/policy-id'
+      
+    get:
+      summary: Read a specific policy
+      description: Operation to read a policy
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/policy'
+    
+    post:
+      summary: Update an existing policy
+      description: Operation to update an existing policy
+      responses:
+        200:
+          description: OK
+    
+    
+            
+  /policy-sets/{resource-id}:
+    parameters:
+      - $ref: '#/parameters/resource-id'
+    post:
+      summary: create a new policy set
+      description: operation to create a policy set
+      responses:
+        200:
+          description: OK
+          
+    get:
+      summary: read policy set of specific resource 
+      description: read operation of a resources policy set
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/policy-set'
+    
+    
+  
+  /resources:
+    post:
+      summary: creates a resource
+      description: required to create a resource which is either data, a service or another component
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - write:
+          - com.zalando.identity::policy.write
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/resource'
+          
+  /resources/{resource-id}:
+    get:
+      summary: Returns all known resource 
+      description: Resource Manager (Kio for now)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/resource-id'
+      security:
+        - read:
+          - com.zalando.identity::policy.read
+      responses:
+        200:
+          description: return all policies
+          schema:
+            $ref: '#/definitions/resource'
+  
+  /conditions:
+    get:
+      summary: View all existing conditions
+      description: Overview on all conditions
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/condition'
+            
+            
+    post:
+      summary: create a condition
+      description: operation to create a condition
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/condition'
+            
+  /conditions/{condition-id}:
+    get:
+      summary: View specific condition
+      description: Read of a specific condition
+      parameters:
+        - $ref: '#/parameters/condition-id'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/condition'
+            
+            
+  /rules:
+    get:
+      summary: Retrieve rules
+      description: Get all the rule identifer available
+      responses:
+        200:
+          description: OK
+          
+    post:
+      summary: Retrieve rules
+      description: Get all the rule identifer available
+      responses:
+        200:
+          description: OK
+          
+  /rules/{rule-id}:
+    get:
+      summary: Read a Rule
+      description: Get values of a specific rule
+      parameters:
+        - $ref: '#/parameters/rule-id'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/rule'
+    
+    
+
+definitions:
+
+  condition:
+    type: object
+    description: Describes a case in which a rule may or may not be applied
+    properties:
+      name:
+        type: string
+        description: name of the condition
+      definition:
+        type: array
+        items:
+          $ref: '#/definitions/condition-attributes'
+      privilege:
+        type: string
+        
+  condition-attributes:
+    type: object
+    description: items which are part of the definition in a condition
+    properties:
+      realm:
+        type: array
+        description: simple restriction to segregate user, services and customers
+        items: 
+          type: string
+      audience:
+        type: array
+        description: allows restriction of audience - based on OAuth2 clients
+        items:
+          type: string
+      bp:
+        type: array
+        description: restrict condition to one or many business partners
+        items: 
+          type: string
+      auth_time:
+        type: string
+        description: Restrict match of condition based on authentication time. Only applies to realm users and customers. Using this attribute for services would lead to deny effect in a given rule.
+
+  metadata:
+    type: object
+    description: foo
+    properties:
+      business_partner_id:
+        type: string
+        description: foo
+      last_modified:
+        type: string
+      created_by: 
+        type: string
+  
+  policies:
+    type: array
+    items:
+      $ref: '#/definitions/policy'
+  
+  policy-set:
+    type: object
+    description: defines a policy set
+    properties:
+      ps-id:
+        type: string
+      version:
+        type: string
+        description: version number of the currently used schema
+      policy-combination-alg:
+        type: string
+        description: algorithm determining how multiple policies are interpreted
+      policies:
+        $ref: '#/definitions/policies'
+        
+
+
+    
+  policy:
+    type: object
+    description: single policy
+    properties:
+      metadata:
+        $ref: '#/definitions/metadata'
+      issuer:
+        type: string
+        description: issuer of the policy
+      id: 
+        type: string
+      rules:
+        type: array
+        items:
+          $ref: '#/definitions/rule'
+      rule-alg:
+        type: string
+        description: determines how rules in a policy are to be combined
+      resources:
+        type: array
+        items:
+          $ref: '#/definitions/resource'
+  
+  resource:
+    type: object
+    description: data, service or component
+    properties:
+      resource-id:
+        type: string
+        description: unique identifier of a resource
+      resource-type:
+        type: string
+    example:
+      resource-id: zrn::zalando::application
+      resource-type: service
+      
+      
+  rule:
+    type: object
+    description: foo
+    properties:
+      id:
+        type: string
+        description: identifier
+      name:
+        type: string
+        description: human readable name of a rule
+      conditions:
+        type: array
+        description: array of conditions
+        items:
+          $ref: '#/definitions/condition'
+      effect:
+        type: string
+        description: returns a basic effect of the rule ALLOW|DENY
+
+parameters:
+
+  resource-id:
+    name: resource-id
+    in: path
+    required: true
+    type: string
+    description: identifies a resource
+    
+  condition-id:
+    name: condition-id
+    in: path
+    required: true
+    type: string
+    description: identifies a condition
+    
+  rule-id:
+    name: rule-id
+    in: path
+    required: true
+    type: string
+    description: identifies a rule
+    
+  policy-id:
+    name: policy-id
+    in: path
+    required: true
+    type: string
+    description: identifies a policy
